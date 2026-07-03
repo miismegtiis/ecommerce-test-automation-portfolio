@@ -1,8 +1,9 @@
 import os
-import allure
 import pytest
+import allure
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 @pytest.fixture
@@ -13,20 +14,19 @@ def driver():
     chrome_options.add_argument('--guest')
     chrome_options.add_argument('lang=en')
 
-    #Headless in CI
+    # Headless in CI
     if os.getenv("CI"):
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
 
-    driver = webdriver.Chrome(
-        ChromeDriverManager().install(),
-        options=chrome_options)
-    
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
     driver.get("https://automationexercise.com")
     yield driver
-    # driver.quit()
+    driver.quit()
 
 # Automatically attach screenshot, HTML source, and console logs on failure
 @pytest.hookimpl(hookwrapper=True)
